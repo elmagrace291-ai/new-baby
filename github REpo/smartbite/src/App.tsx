@@ -77,31 +77,31 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Restaurant Owner Routes - Only accessible by restaurant owners */}
-      <Route path="/owner" element={
-        <ProtectedRoute allowedRoles={['owner']}>
+      {/* Restaurant Manager Routes - Only accessible by restaurant managers */}
+      <Route path="/manager" element={
+        <ProtectedRoute allowedRoles={['manager']}>
           <RestaurantDashboard />
         </ProtectedRoute>
       } />
       <Route path="/manage-menu" element={
-        <ProtectedRoute allowedRoles={['owner']}>
+        <ProtectedRoute allowedRoles={['manager']}>
           <ManageMenu />
         </ProtectedRoute>
       } />
       <Route path="/restaurant-orders" element={
-        <ProtectedRoute allowedRoles={['owner']}>
+        <ProtectedRoute allowedRoles={['manager']}>
           <RestaurantOrders />
         </ProtectedRoute>
       } />
       
-      {/* Delivery Agent Routes - Only accessible by delivery agents */}
-      <Route path="/agent" element={
-        <ProtectedRoute allowedRoles={['agent']}>
+      {/* Delivery Driver Routes - Only accessible by delivery drivers */}
+      <Route path="/driver" element={
+        <ProtectedRoute allowedRoles={['driver']}>
           <DeliveryDashboard />
         </ProtectedRoute>
       } />
       <Route path="/delivery-jobs" element={
-        <ProtectedRoute allowedRoles={['agent']}>
+        <ProtectedRoute allowedRoles={['driver']}>
           <DeliveryJobs />
         </ProtectedRoute>
       } />
