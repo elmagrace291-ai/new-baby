@@ -4,7 +4,7 @@ import Layout from '../../components/Layout';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRestaurants } from '../../contexts/RestaurantContext';
 import { useMenu } from '../../contexts/MenuContext';
-import { Plus, Edit, Trash2, ArrowLeft, Clock, DollarSign, Eye, EyeOff, X } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, ArrowLeft, Clock, DollarSign, Eye, EyeOff, X } from 'lucide-react';
 
 export default function ManageMenu() {
   const { user } = useAuth();

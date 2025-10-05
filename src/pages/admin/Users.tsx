@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { usersAPI } from '../../services/api';
-import { ArrowLeft, Search, Filter, Edit, Trash2, UserCheck, UserX, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Search, Filter, CreditCard as Edit, Trash2, UserCheck, UserX, AlertCircle } from 'lucide-react';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
