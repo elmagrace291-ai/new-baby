@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authAPI } from '../../services/api';
-import { UtensilsCrossed, User, Mail, Lock, Phone, MapPin, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { UtensilsCrossed, User, Mail, Lock, Phone, MapPin, Eye, EyeOff, CircleAlert as AlertCircle } from 'lucide-react';
 import { cameroonianTowns } from '../../data/mockData';
 
 export default function Register() {
@@ -11,7 +11,7 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'customer' as 'customer' | 'owner' | 'agent' | 'admin',
+    role: 'customer' as 'customer' | 'manager' | 'driver' | 'admin',
     phone: '',
     town: ''
   });
@@ -96,8 +96,8 @@ export default function Register() {
   const getAvailableRoles = () => {
     const baseRoles = {
       customer: 'Order food from your favorite restaurants',
-      owner: 'Manage your restaurant and menu',
-      agent: 'Deliver food and earn money'
+      manager: 'Manage your restaurant and menu',
+      driver: 'Deliver food and earn money'
     };
 
     // Only include admin role if no admin exists yet
@@ -232,7 +232,7 @@ export default function Register() {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-gray-900 capitalize">
-                        {role === 'owner' ? 'Restaurant Owner' : role}
+                        {role === 'manager' ? 'Restaurant Manager' : role === 'driver' ? 'Delivery Agent' : role}
                       </span>
                       <span className="text-xs text-gray-500 mt-1">
                         {description}
@@ -287,8 +287,8 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Phone (for agents and owners) */}
-            {(formData.role === 'agent' || formData.role === 'owner') && (
+            {/* Phone (for drivers and managers) */}
+            {(formData.role === 'driver' || formData.role === 'manager') && (
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number
@@ -303,7 +303,7 @@ export default function Register() {
                     type="tel"
                     value={formData.phone}
                     onChange={handleChange}
-                    required={formData.role === 'agent'}
+                    required={formData.role === 'driver'}
                     className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     placeholder="+237 6XX XXX XXX"
                   />

@@ -111,6 +111,7 @@ try {
             $email = trim($data['email'] ?? '');
             $password = $data['password'] ?? '';
             $confirm = $data['confirm'] ?? '';
+            $role = $data['role'] ?? 'customer';
 
             // Validation
             if (empty($name) || empty($email) || empty($password) || empty($confirm)) {
@@ -131,14 +132,37 @@ try {
                 exit;
             }
 
-            if (strlen($password) < 8 || 
-                !preg_match('/[A-Z]/', $password) || 
-                !preg_match('/[a-z]/', $password) || 
-                !preg_match('/\d/', $password) || 
+            if (strlen($password) < 8 ||
+                !preg_match('/[A-Z]/', $password) ||
+                !preg_match('/[a-z]/', $password) ||
+                !preg_match('/\d/', $password) ||
                 !preg_match('/[^A-Za-z0-9]/', $password)) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Password must be at least 8 characters with uppercase, lowercase, number, and symbol']);
                 exit;
+            }
+
+            // Validate role
+            $validRoles = ['customer', 'manager', 'driver', 'admin'];
+            if (!in_array($role, $validRoles)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid role specified']);
+                exit;
+            }
+
+            // Check if admin already exists
+            if ($role === 'admin') {
+                $stmt = $conn->prepare('SELECT COUNT(*) as count FROM Admin');
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                $stmt->close();
+
+                if ($row['count'] > 0) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Admin account already exists. Only one admin is allowed.']);
+                    exit;
+                }
             }
 
             $conn->begin_transaction();
@@ -157,12 +181,47 @@ try {
                 $stmt->execute();
                 $stmt->close();
 
-                // Create customer role by default
-                $stmt = $conn->prepare('INSERT INTO Customer (UserID) VALUES (?)');
-                $stmt->bind_param('i', $userId);
-                $stmt->execute();
-                $customerId = $stmt->insert_id;
-                $stmt->close();
+                // Create role-specific records
+                if ($role === 'customer') {
+                    $stmt = $conn->prepare('INSERT INTO Customer (UserID) VALUES (?)');
+                    $stmt->bind_param('i', $userId);
+                    $stmt->execute();
+                    $stmt->close();
+                } elseif ($role === 'admin') {
+                    $stmt = $conn->prepare('INSERT INTO Admin (UserID) VALUES (?)');
+                    $stmt->bind_param('i', $userId);
+                    $stmt->execute();
+                    $stmt->close();
+                } elseif ($role === 'manager' || $role === 'driver') {
+                    // Create staff record first
+                    $staffRole = $role === 'manager' ? 'MANAGER' : 'DELIVERY';
+                    $staffStatus = 'ACTIVE';
+                    $stmt = $conn->prepare('INSERT INTO RestaurantStaff (UserID, Role, Status, DateHired) VALUES (?, ?, ?, CURDATE())');
+                    $stmt->bind_param('iss', $userId, $staffRole, $staffStatus);
+                    $stmt->execute();
+                    $staffId = $stmt->insert_id;
+                    $stmt->close();
+
+                    if ($role === 'manager') {
+                        $stmt = $conn->prepare('INSERT INTO RestaurantManager (StaffID) VALUES (?)');
+                        $stmt->bind_param('i', $staffId);
+                        $stmt->execute();
+                        $stmt->close();
+                    } elseif ($role === 'driver') {
+                        $stmt = $conn->prepare('INSERT INTO DeliveryAgent (StaffID) VALUES (?)');
+                        $stmt->bind_param('i', $staffId);
+                        $stmt->execute();
+                        $stmt->close();
+                    }
+                }
+
+                // Always create customer role as well for all users except admin
+                if ($role !== 'customer' && $role !== 'admin') {
+                    $stmt = $conn->prepare('INSERT INTO Customer (UserID) VALUES (?)');
+                    $stmt->bind_param('i', $userId);
+                    $stmt->execute();
+                    $stmt->close();
+                }
 
                 $conn->commit();
 
@@ -218,6 +277,18 @@ try {
             session_unset();
             session_destroy();
             echo json_encode(['success' => true]);
+            break;
+
+        case 'check_admin':
+            $stmt = $conn->prepare('SELECT COUNT(*) as count FROM Admin');
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $stmt->close();
+
+            echo json_encode([
+                'adminExists' => $row['count'] > 0
+            ]);
             break;
 
         default:

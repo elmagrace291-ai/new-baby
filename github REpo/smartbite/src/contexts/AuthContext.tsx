@@ -5,7 +5,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'customer' | 'owner' | 'agent' | 'admin' | 'manager' | 'driver';
+  role: 'customer' | 'admin' | 'manager' | 'driver';
   phone?: string;
   town?: string;
 }

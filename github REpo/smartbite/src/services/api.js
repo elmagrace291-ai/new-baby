@@ -38,7 +38,8 @@ export const authAPI = {
     phone: userData.phone || '',
     email: userData.email,
     password: userData.password,
-    confirm: userData.password
+    confirm: userData.password,
+    role: userData.role || 'customer'
   }).then(response => {
     if (response.data.success) {
       return api.post('/api_auth.php?action=login', {
@@ -64,7 +65,7 @@ export const authAPI = {
     throw new Error('Not authenticated');
   }),
   logout: () => api.get('/api_auth.php?action=logout'),
-  checkAdmin: () => api.get('/api_auth.php?action=check'),
+  checkAdmin: () => api.get('/api_auth.php?action=check_admin'),
 };
 
 export const usersAPI = {
